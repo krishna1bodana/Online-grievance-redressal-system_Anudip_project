@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Grievance{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto;">
+
+    <h2 style="text-align:center;">Update Grievance</h2>
+
+    <div class="grievance-card" style="border-left-color: var(--primary-blue);">
+        <h4>{{ grievance.title }}</h4>
+        <p>{{ grievance.description }}</p>
+
+        <p>
+            <strong>Status:</strong>
+            <span class="status-badge status-{{ grievance.status|cut:" " }}">
+                {{ grievance.status }}
+            </span>
+        </p>
+
+        <p>
+            <strong>Priority:</strong>
+            {{ grievance.priority }}
+        </p>
+    </div>
+
+    <form method="post" style="margin-top:20px;">
+        {% csrf_token %}
+
+        <label><strong>Change Status:</strong></label>
+        <select name="status" style="width:100%; padding:6px;">
+            {% for key, value in status_choices %}
+                <option value="{{ key }}" {% if grievance.status == key %}selected{% endif %}>
+                    {{ value }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <label><strong>Change Priority:</strong></label>
+        <select name="priority" style="width:100%; padding:6px;">
+            {% for key, value in priority_choices %}
+                <option value="{{ key }}" {% if grievance.priority == key %}selected{% endif %}>
+                    {{ value }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <label><strong>Officer Remark:</strong></label>
+        <textarea name="remark"
+                  rows="4"
+                  style="width:100%; padding:8px;"
+                  placeholder="Explain actions taken or resolution details...">{{ grievance.officer_remark }}</textarea>
+
+        <button type="submit" class="btn-primary" style="margin-top:20px;">
+            Save Changes
+        </button>
+    </form>
+
+    <p style="margin-top:20px;">
+        <a href="{% url 'grievance:officer_dashboard' %}">
+            ← Back to Dashboard
+        </a>
+    </p>
+</div>
+{% endblock %}

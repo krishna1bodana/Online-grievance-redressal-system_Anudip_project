@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Grievance{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-md-8">
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-body p-4">
+
+                <h3 class="text-center mb-4">
+                    Submit a New Grievance
+                </h3>
+
+                {% if duplicate_warning %}
+                    <div class="alert alert-warning">
+                        ⚠ A similar grievance already exists:
+                        <strong>{{ duplicate_warning.title }}</strong>
+                        <br>
+                        <a class="alert-link"
+                           href="{% url 'grievance:grievance_detail' duplicate_warning.id %}">
+                            View existing grievance
+                        </a>
+                    </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label">
+                                {{ field.label }}
+                            </label>
+
+                            {{ field.as_widget|safe }}
+
+                            <script>
+                                document.addEventListener("DOMContentLoaded", function () {
+                                    const el = document.getElementById("{{ field.id_for_label }}");
+                                    if (el) {
+                                        el.classList.add("form-control");
+                                    }
+                                });
+                            </script>
+
+                            {% if field.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ field.errors|striptags }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-dark w-100">
+                        Submit Grievance
+                    </button>
+                </form>
+
+                <hr>
+
+                <p class="text-center mb-0">
+                    <a href="{% url 'grievance:home' %}">
+                        Back to Home
+                    </a>
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

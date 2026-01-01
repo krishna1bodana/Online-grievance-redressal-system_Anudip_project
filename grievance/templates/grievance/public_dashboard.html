@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Public Transparency Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+    <div class="text-center mb-5">
+        <h2>📊 Public Transparency Dashboard</h2>
+        <p class="text-muted">
+            Anonymous overview of grievance handling statistics
+        </p>
+    </div>
+
+    <!-- =========================
+         PLATFORM STATS
+    ========================= -->
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Grievances</h6>
+                    <h3 class="fw-bold">{{ total }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm text-center border-success">
+                <div class="card-body">
+                    <h6 class="text-muted">Resolved</h6>
+                    <h3 class="fw-bold text-success">{{ resolved }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm text-center border-warning">
+                <div class="card-body">
+                    <h6 class="text-muted">Pending</h6>
+                    <h3 class="fw-bold text-warning">{{ pending }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm text-center border-danger">
+                <div class="card-body">
+                    <h6 class="text-muted">Overdue (SLA)</h6>
+                    <h3 class="fw-bold text-danger">{{ overdue }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 col-lg-2">
+            <div class="card shadow-sm text-center border-primary">
+                <div class="card-body">
+                    <h6 class="text-muted">Resolution Rate</h6>
+                    <h3 class="fw-bold">{{ resolution_rate }}%</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- =========================
+         CATEGORY BREAKDOWN
+    ========================= -->
+    <h4 class="mb-3">📂 Category-wise Breakdown</h4>
+
+    <div class="table-responsive mb-5">
+        <table class="table table-bordered table-hover align-middle text-center">
+            <thead class="table-light">
+                <tr>
+                    <th>Category</th>
+                    <th>Total</th>
+                    <th>Resolved</th>
+                    <th>Resolution %</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in category_stats %}
+                <tr>
+                    <td>{{ c.category__name|default:"Uncategorized" }}</td>
+                    <td>{{ c.total }}</td>
+                    <td>{{ c.resolved }}</td>
+                    <td>
+                        {% if c.total %}
+                            {{ c.resolved|floatformat:2|add:"0"|floatformat }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- =========================
+         MONTHLY INSIGHTS
+    ========================= -->
+    <h4 class="mb-3">🗓 Monthly Insights</h4>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">Filed This Month</h6>
+                    <h4 class="fw-bold">{{ monthly_filed }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm text-center">
+                <div class="card-body">
+                    <h6 class="text-muted">Resolved This Month</h6>
+                    <h4 class="fw-bold">{{ monthly_resolved }}</h4>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- =========================
+         FOOTNOTE
+    ========================= -->
+    <p class="text-muted small mt-4">
+        ⚠ This dashboard contains no personal or sensitive information.
+    </p>
+
+</div>
+{% endblock %}

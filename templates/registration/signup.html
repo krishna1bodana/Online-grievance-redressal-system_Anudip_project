@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Signup{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+
+        <div class="card shadow-sm mt-5">
+            <div class="card-body p-4">
+
+                <h3 class="text-center mb-4">
+                    Create Account
+                </h3>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            {{ field }}
+
+                            {% if field.errors %}
+                                <div class="text-danger small">
+                                    {{ field.errors|striptags }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-success w-100">
+                        Sign Up
+                    </button>
+                </form>
+
+                <hr>
+
+                <p class="text-center mb-1">
+                    Already have an account?
+                    <a href="{% url 'login' %}">Login</a>
+                </p>
+
+                <p class="text-center">
+                    <a href="{% url 'grievance:home' %}">
+                        Back to Home
+                    </a>
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
