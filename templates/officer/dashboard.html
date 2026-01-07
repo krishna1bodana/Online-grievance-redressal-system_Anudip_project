@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Officer Dashboard | GrievancePortal{% endblock %}
+
+{% block content %}
+
+<div class="d-md-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h2 class="fw-bold mb-0">Officer Dashboard</h2>
+        <p class="text-muted">Welcome back, <strong>{{ user.get_full_name|default:user.username }}</strong></p>
+    </div>
+    <div class="text-md-end">
+        <span class="badge bg-light text-dark border p-2">
+            <i class="fas fa-calendar-day me-1"></i> {{ today|date:"M d, Y" }}
+        </span>
+    </div>
+</div>
+
+<div class="row g-3 mb-5">
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card shadow-sm text-center h-100 border-0">
+            <div class="card-body">
+                <div class="text-primary mb-2"><i class="fas fa-inbox fa-lg"></i></div>
+                <h6 class="text-muted x-small text-uppercase fw-bold">Assigned</h6>
+                <h3 class="fw-bold mb-0">{{ total_assigned }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card shadow-sm text-center h-100 border-0 border-bottom border-success border-3">
+            <div class="card-body">
+                <div class="text-success mb-2"><i class="fas fa-check-double fa-lg"></i></div>
+                <h6 class="text-muted x-small text-uppercase fw-bold">Resolved</h6>
+                <h3 class="fw-bold mb-0 text-success">{{ resolved_count }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card shadow-sm text-center h-100 border-0 border-bottom border-warning border-3">
+            <div class="card-body">
+                <div class="text-warning mb-2"><i class="fas fa-hourglass-half fa-lg"></i></div>
+                <h6 class="text-muted x-small text-uppercase fw-bold">Pending</h6>
+                <h3 class="fw-bold mb-0 text-warning">{{ pending_count }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card shadow-sm text-center h-100 border-0 border-bottom border-danger border-3">
+            <div class="card-body">
+                <div class="text-danger mb-2"><i class="fas fa-clock fa-lg"></i></div>
+                <h6 class="text-muted x-small text-uppercase fw-bold">Overdue</h6>
+                <h3 class="fw-bold mb-0 text-danger">{{ overdue_count }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card shadow-sm text-center h-100 border-0">
+            <div class="card-body">
+                <div class="text-info mb-2"><i class="fas fa-percentage fa-lg"></i></div>
+                <h6 class="text-muted x-small text-uppercase fw-bold">Rate</h6>
+                <h4 class="fw-bold mb-0">{{ resolution_rate }}%</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-lg-2">
+        <div class="card shadow-sm text-center h-100 border-0">
+            <div class="card-body">
+                <div class="text-secondary mb-2"><i class="fas fa-tachometer-alt fa-lg"></i></div>
+                <h6 class="text-muted x-small text-uppercase fw-bold">Avg Time</h6>
+                <p class="fw-bold mb-0 small">
+                    {% if avg_resolution %}{{ avg_resolution }}{% else %}--{% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="fw-bold mb-0">Active Tasks</h4>
+    <div class="dropdown">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Filter Status
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">All</a></li>
+            <li><a class="dropdown-item" href="#">High Priority</a></li>
+            <li><a class="dropdown-item" href="#">Overdue</a></li>
+        </ul>
+    </div>
+</div>
+
+{% if assignments %}
+    <div class="row g-4">
+        {% for a in assignments %}
+            <div class="col-md-6 col-xl-4">
+                <div class="card shadow-sm h-100 border-0 border-top border-4 
+                    {% if a.grievance.priority == 'High' %}border-danger
+                    {% elif a.grievance.priority == 'Medium' %}border-warning
+                    {% else %}border-primary{% endif %}">
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold mb-0">{{ a.grievance.title|truncatechars:40 }}</h5>
+                            <span class="badge 
+                                {% if a.grievance.priority == 'High' %}bg-danger
+                                {% elif a.grievance.priority == 'Medium' %}bg-warning text-dark
+                                {% else %}bg-success{% endif %}">
+                                {{ a.grievance.priority }}
+                            </span>
+                        </div>
+
+                        <p class="text-muted small mb-3">#{{ a.grievance.id }} | {{ a.grievance.category.name|default:"General" }}</p>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span>Status: <strong>{{ a.grievance.status }}</strong></span>
+                                <span>{{ a.grievance.created_at|date:"M d" }}</span>
+                            </div>
+                            {% if a.grievance.status == 'Resolved' %}
+                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-success" style="width: 100%"></div></div>
+                            {% elif a.grievance.status == 'In Progress' %}
+                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-info" style="width: 50%"></div></div>
+                            {% else %}
+                                <div class="progress" style="height: 6px;"><div class="progress-bar bg-warning" style="width: 10%"></div></div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex align-items-center small text-muted">
+                            <i class="fas fa-user-circle me-1"></i> {{ a.grievance.user.username }}
+                        </div>
+
+                        {% if a.grievance.is_overdue %}
+                            <div class="mt-3 p-2 bg-danger-subtle text-danger rounded small fw-bold text-center">
+                                <i class="fas fa-exclamation-triangle me-1"></i> SLA BREACHED
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-footer bg-light border-0 py-3">
+                        <a href="{% url 'grievance:officer_update_status' a.grievance.id %}" class="btn btn-primary btn-sm w-100">
+                            Process Grievance <i class="fas fa-chevron-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <div class="display-1 text-muted mb-3"><i class="fas fa-clipboard-check"></i></div>
+        <h5 class="text-muted">All clear! No pending assignments.</h5>
+    </div>
+{% endif %}
+
+{% endblock %}

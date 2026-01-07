@@ -1,0 +1,177 @@
+/* =========================
+   ADVANCED VARIABLES
+========================= */
+:root {
+    /* Sophisticated Color Palette */
+    --primary-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    
+    --primary-blue: #0d6efd;
+    --success-green: #10b981; /* More vibrant green */
+    --error-red: #ef4444;
+    --warning-yellow: #f59e0b;
+    --dark-gray: #1e293b;
+    --bg-soft: #f1f5f9;
+
+    /* Depth & Elevation */
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-immersive: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    --radius-immersive: 1.25rem;
+    --transition-smooth: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* =========================
+   IMMERSIVE BASE
+========================= */
+body {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    background: radial-gradient(circle at top right, #f8fafc, #e2e8f0);
+    color: var(--dark-gray);
+    line-height: 1.6;
+}
+
+/* Custom Scrollbar for modern feel */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* =========================
+   COMPONENTS
+========================= */
+
+/* Glassmorphism Card */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-immersive);
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+}
+
+.glass-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: var(--shadow-immersive);
+    border-color: rgba(13, 110, 253, 0.3);
+}
+
+/* Immersive KPI Cards */
+.stat-card {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100px;
+    height: 100px;
+    background: var(--primary-gradient);
+    filter: blur(50px);
+    opacity: 0.1;
+    z-index: -1;
+    transition: var(--transition-smooth);
+}
+
+.stat-card:hover::before {
+    transform: scale(3);
+    opacity: 0.15;
+}
+
+/* Gradient Text */
+.text-gradient {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+/* Immersive Buttons */
+.btn-immersive {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.8rem;
+    border-radius: 50px;
+    font-weight: 600;
+    box-shadow: 0 10px 15px -3px rgba(13, 110, 253, 0.3);
+    transition: var(--transition-smooth);
+}
+
+.btn-immersive:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 25px -5px rgba(13, 110, 253, 0.4);
+    color: white;
+}
+
+/* =========================
+   CHARTS & TABLES
+========================= */
+canvas#categoryChart {
+    filter: drop-shadow(0 10px 8px rgba(0,0,0,0.04));
+}
+
+.table-immersive {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.table-immersive tr {
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+}
+
+.table-immersive td {
+    background: white;
+    border: none;
+    padding: 1.2rem;
+}
+
+.table-immersive td:first-child { border-radius: 15px 0 0 15px; }
+.table-immersive td:last-child { border-radius: 0 15px 15px 0; }
+
+.table-immersive tr:hover td {
+    background: #f8fafc;
+    transform: scale(1.01);
+    color: var(--primary-blue);
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+.reveal-on-load {
+    animation: reveal 0.8s ease-out forwards;
+}
+
+@keyframes reveal {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse for Overdue items */
+.pulse-danger {
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}

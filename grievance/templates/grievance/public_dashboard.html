@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block title %}Transparency Portal | Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="text-center mb-5 reveal-on-load">
+        <h1 class="display-4 text-gradient mb-2">Public Transparency Dashboard</h1>
+        <p class="text-muted mx-auto max-w-700">
+            A real-time, high-fidelity overview of our grievance redressal performance and institutional accountability.
+        </p>
+    </div>
+
+    <div class="row g-4 mb-5 justify-content-center reveal-on-load">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="glass-card stat-card p-4 text-center">
+                <h6 class="text-muted x-small text-uppercase tracking-widest">Total Filed</h6>
+                <h2 class="fw-bold mb-0">{{ total|default:0 }}</h2>
+            </div>
+        </div>
+        
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="glass-card stat-card p-4 text-center" style="border-bottom: 3px solid var(--success-green);">
+                <h6 class="text-muted x-small text-uppercase tracking-widest">Resolved</h6>
+                <h2 class="fw-bold mb-0 text-success">{{ resolved|default:0 }}</h2>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="glass-card stat-card p-4 text-center" style="border-bottom: 3px solid var(--warning-yellow);">
+                <h6 class="text-muted x-small text-uppercase tracking-widest">Pending</h6>
+                <h2 class="fw-bold mb-0 text-warning">{{ pending|default:0 }}</h2>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="glass-card stat-card p-4 text-center {% if overdue > 0 %}pulse-danger{% endif %}" style="border-bottom: 3px solid var(--error-red);">
+                <h6 class="text-muted x-small text-uppercase tracking-widest">Overdue</h6>
+                <h2 class="fw-bold mb-0 text-danger">{{ overdue|default:0 }}</h2>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="btn-immersive d-flex flex-column align-items-center justify-content-center h-100">
+                <h6 class="x-small text-uppercase opacity-75">Success Rate</h6>
+                <h2 class="fw-bold mb-0">{{ resolution_rate|default:0 }}%</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-5 mb-5 reveal-on-load">
+        <div class="col-lg-5">
+            <div class="glass-card p-4 h-100">
+                <h5 class="fw-bold mb-4 text-gradient"><i class="fas fa-chart-pie me-2"></i>Category Load</h5>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="glass-card p-4 h-100">
+                <h5 class="fw-bold mb-4 text-gradient"><i class="fas fa-layer-group me-2"></i>Departmental Performance</h5>
+                <div class="table-responsive">
+                    <table class="table table-immersive">
+                        <thead class="small text-uppercase text-muted">
+                            <tr>
+                                <th class="border-0 ps-4">Department</th>
+                                <th class="border-0 text-center">Total</th>
+                                <th class="border-0">Resolution Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in category_stats %}
+                            <tr>
+                                <td class="fw-bold">{{ c.category__name|default:"General" }}</td>
+                                <td class="text-center">{{ c.total|default:0 }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="progress flex-grow-1 me-3" style="height: 10px; background: rgba(0,0,0,0.05);">
+                                            <div class="progress-bar bg-success shadow-sm" 
+                                                 style="width: calc({% widthratio c.resolved|default:0 c.total|default:1 100 %}% * 1);">
+                                            </div>
+                                        </div>
+                                        <span class="x-small fw-bold">{% widthratio c.resolved|default:0 c.total|default:1 100 %}%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 reveal-on-load" style="animation-delay: 0.2s;">
+        <div class="col-md-6">
+            <div class="glass-card p-4 d-flex align-items-center">
+                <div class="icon-box-60 bg-primary-subtle rounded-circle text-primary d-flex align-items-center justify-content-center me-4">
+                    <i class="fas fa-calendar-plus fa-2x"></i>
+                </div>
+                <div>
+                    <p class="text-muted mb-0 small text-uppercase fw-bold">Monthly Intake</p>
+                    <h3 class="fw-bold mb-0">{{ monthly_filed|default:0 }} New Grievances</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card p-4 d-flex align-items-center">
+                <div class="icon-box-60 bg-success-subtle rounded-circle text-success d-flex align-items-center justify-content-center me-4">
+                    <i class="fas fa-check-double fa-2x"></i>
+                </div>
+                <div>
+                    <p class="text-muted mb-0 small text-uppercase fw-bold">Monthly Resolution</p>
+                    <h3 class="fw-bold mb-0">{{ monthly_resolved|default:0 }} Solved Cases</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        
+        // Data injected safely from Django
+        const labels = [{% for c in category_stats %}"{{ c.category__name|default:'General'|escapejs }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+        const dataValues = [{% for c in category_stats %}{{ c.total|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: ['#0d6efd', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#8b5cf6'],
+                    hoverOffset: 20,
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: { size: 12, family: 'Plus Jakarta Sans' }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

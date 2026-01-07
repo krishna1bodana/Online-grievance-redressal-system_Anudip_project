@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Feedback | GrievancePortal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .star-rating {
+        direction: rtl;
+        display: inline-flex;
+        font-size: 2rem;
+    }
+    .star-rating input { display: none; }
+    .star-rating label {
+        color: #ddd;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+        color: #ffc107;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'grievance:my_grievances' %}">My Grievances</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'grievance:grievance_detail' grievance.id %}">Details</a></li>
+                <li class="breadcrumb-item active">Feedback</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow border-0">
+            <div class="card-body p-4 p-lg-5">
+
+                <div class="text-center mb-4">
+                    <div class="bg-success-subtle text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="fas fa-comment-alt-heart fa-lg"></i>
+                    </div>
+                    <h3 class="fw-bold">Rate Resolution</h3>
+                    <p class="text-muted small">Your feedback helps us improve our service quality.</p>
+                </div>
+
+                <div class="alert alert-light border mb-4">
+                    <h6 class="fw-bold small text-uppercase text-muted">Resolution Summary</h6>
+                    <p class="mb-0 small"><strong>Case:</strong> {{ grievance.title }}</p>
+                    <p class="mb-0 small"><strong>Officer Remark:</strong> {{ grievance.officer_remark|default:"No remark provided." }}</p>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-4 text-center">
+                        <label class="form-label d-block fw-bold">How would you rate the resolution?</label>
+                        <div class="star-rating">
+                            {% for i in "54321" %}
+                            <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}" required {% if form.rating.value|stringformat:"s" == i %}checked{% endif %}>
+                            <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+                            {% endfor %}
+                        </div>
+                        {% if form.rating.errors %}
+                            <div class="text-danger x-small d-block">{{ form.rating.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.comment.id_for_label }}" class="form-label fw-bold small">Additional Comments</label>
+                        {{ form.comment }}
+                        {% if form.comment.errors %}
+                            <div class="text-danger x-small mt-1">{{ form.comment.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm">
+                        Submit My Feedback <i class="fas fa-paper-plane ms-2"></i>
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <a href="{% url 'grievance:grievance_detail' grievance.id %}" class="text-muted small text-decoration-none">
+                        <i class="fas fa-times me-1"></i> Cancel and go back
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

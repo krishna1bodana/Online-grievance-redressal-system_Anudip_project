@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Grievance #{{ grievance.id }} | Officer Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'grievance:officer_dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Update Status</li>
+            </ol>
+        </nav>
+
+        <div class="card shadow border-0 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="fw-bold mb-0">
+                    <i class="fas fa-edit text-primary me-2"></i> Update Grievance #{{ grievance.id }}
+                </h5>
+            </div>
+            
+            <div class="card-body p-4">
+                <div class="p-3 bg-light rounded mb-4">
+                    <h6 class="fw-bold text-dark">{{ grievance.title }}</h6>
+                    <p class="small text-muted mb-2">{{ grievance.description }}</p>
+                    <div class="d-flex gap-3">
+                        <span class="small"><strong>User:</strong> {{ grievance.user.username }}</span>
+                        <span class="small"><strong>Submitted:</strong> {{ grievance.created_at|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold small">Update Status</label>
+                            <select name="status" class="form-select shadow-sm">
+                                {% for key, value in status_choices %}
+                                    <option value="{{ key }}" {% if grievance.status == key %}selected{% endif %}>
+                                        {{ value }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label class="form-label fw-semibold small">Review Priority</label>
+                            <select name="priority" class="form-select shadow-sm">
+                                {% for key, value in priority_choices %}
+                                    <option value="{{ key }}" {% if grievance.priority == key %}selected{% endif %}>
+                                        {{ value }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">Resolution Remark / Action Taken</label>
+                        <textarea name="remark" 
+                                  rows="5" 
+                                  class="form-control shadow-sm" 
+                                  placeholder="Describe the steps taken to resolve this issue. This will be visible to the user."
+                                  required>{{ grievance.officer_remark }}</textarea>
+                        <div class="form-text x-small text-muted">Provide clear details for the citizen to understand the progress.</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2 fw-bold shadow-sm">
+                            <i class="fas fa-save me-2"></i> Commit Updates
+                        </button>
+                        <a href="{% url 'grievance:officer_dashboard' %}" class="btn btn-link text-decoration-none text-muted small">
+                            Cancel and Return
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 bg-light-subtle">
+            <div class="card-body py-3">
+                <p class="mb-0 small text-muted text-center">
+                    <i class="fas fa-info-circle me-1"></i> 
+                    Updating the status will automatically notify the user and log this change in the history.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

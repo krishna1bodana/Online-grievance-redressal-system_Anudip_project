@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}Case #{{ grievance.id }} | Details{% endblock %}
+
+{% block content %}
+<div id="grievance-detail-container"
+     data-id="{{ grievance.id }}"
+     data-due="{{ grievance.due_date|date:'c' }}"
+     class="row justify-content-center">
+
+    <div class="col-lg-9 col-md-11">
+
+        <div class="card shadow-sm border-0 mb-4 overflow-hidden">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 fw-bold text-primary">Case #{{ grievance.id }}: {{ grievance.title }}</h4>
+                <div class="text-end">
+                    <span id="current-status" class="badge rounded-pill px-3 py-2 
+                        {% if grievance.status == 'Resolved' %}bg-success
+                        {% elif grievance.status == 'In Progress' %}bg-primary
+                        {% else %}bg-warning text-dark{% endif %}">
+                        {{ grievance.status }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body bg-light-subtle">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white rounded shadow-sm h-100">
+                            <small class="text-muted d-block text-uppercase fw-bold x-small">SLA Status</small>
+                            {% if grievance.is_overdue %}
+                                <span class="text-danger fw-bold"><i class="fas fa-exclamation-circle"></i> Overdue</span>
+                            {% else %}
+                                <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> On Track</span>
+                            {% endif %}
+                            <div id="sla-timer" class="mt-2 fw-mono text-primary font-monospace small">Initializing...</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white rounded shadow-sm h-100">
+                            <small class="text-muted d-block text-uppercase fw-bold x-small">Category & Priority</small>
+                            <span class="d-block"><strong>{{ grievance.category.name|default:"General" }}</strong></span>
+                            <span class="badge {% if grievance.priority == 'High' %}bg-danger{% else %}bg-secondary{% endif %} mt-1">
+                                {{ grievance.priority }} Priority
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 bg-white rounded shadow-sm h-100">
+                            <small class="text-muted d-block text-uppercase fw-bold x-small">Resolution Deadline</small>
+                            <span class="d-block fw-bold">{{ grievance.due_date|date:"M d, Y" }}</span>
+                            <span class="small text-muted">{{ grievance.due_date|date:"H:i" }} hrs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-white rounded shadow-sm">
+                    <h6 class="fw-bold border-bottom pb-2 mb-3">Description</h6>
+                    <p class="mb-0 text-dark">{{ grievance.description|linebreaks }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="fw-bold mb-4"><i class="fas fa-history me-2 text-secondary"></i>Status Timeline</h5>
+                        <div class="timeline small">
+                            {% for h in history %}
+                                <div class="mb-3 border-start border-2 ps-3 position-relative">
+                                    <i class="fas fa-circle position-absolute text-primary" style="left: -7px; top: 0; font-size: 12px;"></i>
+                                    <div class="fw-bold">{{ h.new_status }}</div>
+                                    <div class="text-muted x-small">{{ h.changed_at|date:"M d, Y • H:i" }}</div>
+                                    {% if h.changed_by %}
+                                        <div class="x-small text-secondary">Updated by {{ h.changed_by.username }}</div>
+                                    {% endif %}
+                                </div>
+                            {% empty %}
+                                <p class="text-muted italic">No updates recorded yet.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if grievance.officer_remark %}
+                <div class="card shadow-sm border-0 mb-4 bg-primary-subtle border-start border-primary border-4">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-primary"><i class="fas fa-comment-dots me-2"></i>Official Response</h6>
+                        <p class="mb-0 small text-dark">{{ grievance.officer_remark }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-5">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-paperclip me-2"></i>Supporting Documents</h6>
+                        <div class="list-group list-group-flush">
+                            {% for a in grievance.attachments.all %}
+                                <a href="{{ a.file.url }}" class="list-group-item list-group-item-action border-0 px-0 small" target="_blank">
+                                    <i class="far fa-file-alt me-2 text-primary"></i> {{ a.file.name|truncatechars:30 }}
+                                </a>
+                            {% empty %}
+                                <p class="text-muted small">No files attached.</p>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'grievance:upload_attachment' grievance.id %}" class="btn btn-sm btn-outline-primary w-100 mt-2">
+                            <i class="fas fa-upload me-1"></i> Upload File
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-newspaper me-2"></i>Updates in {{ grievance.category.name }}</h6>
+                        {% for article in news_articles %}
+                            <div class="mb-3 pb-2 border-bottom last-child-no-border">
+                                <a href="{{ article.url }}" target="_blank" class="text-decoration-none small fw-bold d-block mb-1">{{ article.title }}</a>
+                                <small class="text-muted x-small d-block">{{ article.source.name }} • {{ article.publishedAt|slice:":10" }}</small>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted small">No recent news.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-5 bg-white">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <a href="{% url 'grievance:my_grievances' %}" class="btn btn-link text-decoration-none">
+                    <i class="fas fa-chevron-left"></i> Back to My List
+                </a>
+                {% if grievance.status == 'Resolved' and not grievance.feedback %}
+                    <a href="{% url 'grievance:submit_feedback' grievance.id %}" class="btn btn-success shadow-sm">
+                        <i class="fas fa-star me-1"></i> Rate Resolution
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function updateSLATimer() {
+        const container = document.getElementById('grievance-detail-container');
+        const dueDate = new Date(container.dataset.due).getTime();
+        const timerElement = document.getElementById('sla-timer');
+        
+        const now = new Date().getTime();
+        const distance = dueDate - now;
+
+        if (distance < 0) {
+            timerElement.innerHTML = "EXPIRED";
+            timerElement.classList.add('text-danger');
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        timerElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
+    }
+    
+    setInterval(updateSLATimer, 1000);
+    updateSLATimer();
+
+    // AJAX Auto-Refresh Status
+    async function checkStatus() {
+        const gId = document.getElementById('grievance-detail-container').dataset.id;
+        try {
+            const response = await fetch(`/api/grievance-status/${gId}/`);
+            const data = await response.json();
+            const badge = document.getElementById('current-status');
+            if (badge.innerText !== data.status) {
+                location.reload(); // Refresh to show new history items and remarks
+            }
+        } catch (e) { console.log("Status check failed"); }
+    }
+    setInterval(checkStatus, 30000); // Check every 30 seconds
+</script>
+{% endblock %}

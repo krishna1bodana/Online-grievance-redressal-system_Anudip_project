@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}My Grievances | GrievancePortal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0">My Submitted Grievances</h3>
+            <a href="{% url 'grievance:submit_grievance' %}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-plus me-1"></i> New Grievance
+            </a>
+        </div>
+
+        {% if grievances %}
+            <div class="list-group shadow-sm rounded-3 overflow-hidden">
+                {% for g in grievances %}
+                    <div class="list-group-item list-group-item-action p-4 border-start border-4 
+                        {% if g.status == 'Resolved' %}border-success
+                        {% elif g.status == 'In Progress' %}border-primary
+                        {% else %}border-warning{% endif %}">
+                        
+                        <div class="row align-items-center">
+                            <div class="col-md-7 mb-3 mb-md-0">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="fw-bold mb-0 me-3">
+                                        <a href="{% url 'grievance:grievance_detail' g.id %}" class="text-decoration-none text-dark">
+                                            {{ g.title }}
+                                        </a>
+                                    </h5>
+                                    <span class="badge rounded-pill 
+                                        {% if g.status == 'Resolved' %}bg-success
+                                        {% elif g.status == 'In Progress' %}bg-primary
+                                        {% else %}bg-warning text-dark{% endif %}">
+                                        {{ g.status }}
+                                    </span>
+                                </div>
+                                
+                                <p class="small text-muted mb-0">
+                                    <span class="me-2"><i class="fas fa-tag me-1"></i> {{ g.category.name|default:"General" }}</span>
+                                    <span class="me-2"><i class="fas fa-calendar-alt me-1"></i> {{ g.created_at|date:"M d, Y" }}</span>
+                                    <span><i class="fas fa-bolt me-1"></i> {{ g.priority }} Priority</span>
+                                </p>
+                            </div>
+
+                            <div class="col-md-5 text-md-end">
+                                <div class="mb-3">
+                                    {% if g.status != 'Resolved' %}
+                                        {% if g.is_overdue %}
+                                            <span class="text-danger small fw-bold">
+                                                <i class="fas fa-exclamation-triangle"></i> SLA Overdue
+                                            </span>
+                                        {% else %}
+                                            <span class="text-success small fw-bold">
+                                                <i class="fas fa-clock"></i> Resolution on track
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted small">
+                                            <i class="fas fa-check-circle"></i> Completed
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="btn-group">
+                                    <a href="{% url 'grievance:grievance_detail' g.id %}" class="btn btn-sm btn-outline-primary px-3">
+                                        View Details
+                                    </a>
+                                    {% if g.status == 'Resolved' and not g.feedback %}
+                                        <a href="{% url 'grievance:submit_feedback' g.id %}" class="btn btn-sm btn-success px-3">
+                                            Rate Service
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'grievance:upload_attachment' g.id %}" class="btn btn-sm btn-outline-secondary" title="Upload File">
+                                        <i class="fas fa-paperclip"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card border-0 shadow-sm py-5">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-folder-open fa-4x text-light-emphasis"></i>
+                    </div>
+                    <h4 class="fw-bold">No grievances yet</h4>
+                    <p class="text-muted mx-auto" style="max-width: 400px;">
+                        When you submit a grievance, it will appear here so you can track its progress in real-time.
+                    </p>
+                    <a href="{% url 'grievance:submit_grievance' %}" class="btn btn-primary mt-3 px-4">
+                        Submit Your First Grievance
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-5">
+            <a href="{% url 'grievance:home' %}" class="text-secondary text-decoration-none small">
+                <i class="fas fa-arrow-left me-1"></i> Back to Homepage
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
