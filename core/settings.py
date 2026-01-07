@@ -1,7 +1,14 @@
 """
 Django settings for core project.
 """
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+
+# Then change your email settings to use these variables:
+EMAIL_HOST_USER = os.getenv('EMAIL_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS')
 from pathlib import Path
 import os
 
@@ -151,18 +158,32 @@ LOGOUT_REDIRECT_URL = 'login'
 # =========================
 
 # Console backend prints emails to your terminal/cmd
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'no-reply@grievanceportal.com'
+# =========================
+# EMAIL CONFIGURATION (LIVE)
+# =========================
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Gmail SMTP Settings
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Your Credentials
+EMAIL_HOST_USER = 'bodanakrishna38@gmail.com' 
+
+# Use the 16-character App Password from Google
+EMAIL_HOST_PASSWORD = 'fmelnwmztpvlevbi' 
+
+# Branding
+DEFAULT_FROM_EMAIL = 'Grievance Portal <bodanakrishna38@gmail.com>'
 
 # =========================
 # APP-SPECIFIC CONFIG
 # =========================
 
-ADMIN_EMAIL = 'bodanakrishna38@gmai.com'
+ADMIN_EMAIL = 'bodanakrishna38@gmail.com'
 NEWS_API_KEY = os.getenv('NEWS_API_KEY', 'your-fallback-key')
-
-
 # =========================
 # DEFAULT AUTO FIELD
 # =========================
